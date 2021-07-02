@@ -1,32 +1,6 @@
 
 import tkinter as tk
 from tkinter import ttk
-
-# window = tk.Tk()
-# window.title('KPI SELECT DROPDOWN')
-# window.geometry('500x250')
-
-# ttk.Label(window, text = "Btao Bhai Konsa Plot Karna Hai",
-# 		background = 'green', foreground ="white",
-# 		font = ("Times New Roman", 15)).grid(row = 0, column = 1)
-
-
-# ttk.Label(window, text = "Select The KPI for which you want to plot:",
-# 		font = ("Times New Roman", 10)).grid(column = 0,
-# 		row = 5, padx = 10, pady = 25)
-
-
-# chosenKpi= tk.StringVar()
-# selectedKPI = ttk.Combobox(window, width = 27, textvariable = chosenKpi)
-
-# selectedKPI['values'] = ('VoLTE Erlangs','VoLTE Access Failure Rate (GCR)')
-
-# selectedKPI.grid(column = 1, row = 5)
-# selectedKPI.current()
-
-
-
-
 window = tk.Tk()
 window.title('BAR SELECT DROPDOWN')
 window.geometry('500x250')
