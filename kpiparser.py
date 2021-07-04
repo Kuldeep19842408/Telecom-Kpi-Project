@@ -13,6 +13,11 @@ def browseFiles():
 	Df=pd.read_csv(filename)
 	button_plot.grid(column=1,row=8)
 	fileState= Label(window,text="CSV Uploaded").grid(column=1,row=3)
+	selectedCell['values']= list(set(Df['CELL'].tolist()))
+	headers=list(Df.columns.values)
+	headers.remove("CELL")
+	headers.remove("PERIOD_START_TIME")
+	selectedKPI['values']=headers
 def plot():
 	KPI=chosenKpi.get()
 	CELL=chosenCell.get()
@@ -42,18 +47,33 @@ ttk.Label(window, text = "Select The CELL for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 6, padx = 10, pady = 25)
 selectedCell = ttk.Combobox(window, width = 27, textvariable = chosenCell)
-selectedCell['values'] = ('BA3A0138B11','LA3A0138B31','EA3A0138B31','DA3A0138B31')
+selectedCell['values'] = ['Upload Your CSV First']
 selectedCell.grid(column = 1, row = 5)
 ttk.Label(window, text = "Select The Graph for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 7, padx = 10, pady = 25)
 Graphchosen=StringVar()
 selectedGraph = ttk.Combobox(window, width = 27, textvariable = Graphchosen)
-selectedGraph['values'] = ('bar','line',)
+selectedGraph['values'] = ('bar','line','scatter')
 selectedGraph.grid(column = 1, row = 5)
 selectedKPI = ttk.Combobox(window, width = 27, textvariable = chosenKpi)
-selectedKPI['values'] = ('VoLTE Erlangs','VoLTE Access Failure Rate (GCR)')
+selectedKPI['values'] = ['Upload Your CSV First']
 selectedKPI.grid(column = 1, row = 5)
 selectedCell.grid(column=1,row=6)
 selectedGraph.grid(column=1,row=7)
 window.mainloop()
+
+
+
+
+
+
+# Site=selectedSite.get()
+# Sitechosen.set("")
+# ttk.Label(window, text = "Select The Site for which you want to plot:",
+# 		font = ("Times New Roman", 10)).grid(column = 0,
+# 		row = 8, padx = 10, pady = 25)
+# selectedSite=StringVar()
+# selectedSite = ttk.Combobox(window, width = 27, textvariable = Sitechosen)
+# selectedSite['values'] = ('BA3A0138B11','LA3A0138B31','EA3A0138B31','DA3A0138B31')
+# selectedSite.grid(column = 1, row = 8)
