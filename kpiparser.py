@@ -8,9 +8,15 @@ window = Tk()
 chosenKpi= StringVar()
 chosenCell=StringVar()
 Sitechosen=StringVar()
+CellState=[]
+ListOfCells=[]
 def browseFiles():
 	filename = filedialog.askopenfilename(initialdir = "/home/kartik/Downloads",title = "Select a File",filetypes = (("CSV Files","*.csv*"),("Excel Files","*.xls*")))
 	global Df
+	global CellState
+	for i in range(50):
+		x=IntVar(0)
+		CellState.append(x)
 	Df=pd.read_csv(filename)
 	button_plot.grid(column=1,row=9)
 	fileState= Label(window,text="CSV Uploaded").grid(column=1,row=3)
@@ -72,25 +78,37 @@ def browseFiles():
 	if "CELL" not in NonKPIHeaders:
 		selectedCell['values']= ["CELL is Not Present in CSV"]
 	else:
-		selectedCell['values']= list(set(Df['CELL'].tolist()))
+		global ListOfCells
+		ListOfCells=list(set(Df['CELL'].tolist()))
+		cnt=0
+		for i in ListOfCells:
+			x=CellState[cnt]
+			selectedCell2.menu.add_checkbutton(label=i,variable = x)
+			cnt+=1
+		selectedCell['values']=ListOfCells
 	selectedSite['values']= list(set(Df['SITE'].tolist()))
 def plot():
 	KPI=chosenKpi.get()
-	CELL=chosenCell.get()
 	GRAPH=Graphchosen.get()
-	Site=Sitechosen.get()
-	if(Site!=""):
-		DF=Df.loc[(Df["SITE"]==Site)]
-		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
-		plt.show()
-	else:
-		DF=Df.loc[(Df["CELL"]==CELL)]
-		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI) 
-		print(CELL)
-		plt.legend([CELL,KPI],loc='upper left')
-		# plt.legend([KPI],loc='upper right')
-		plt.ylabel(KPI)
-		plt.show()
+	for i in range(len(ListOfCells)):
+		if( CellState[i].get()==1):
+			CELL= ListOfCells[i]
+			DF=Df.loc[(Df["CELL"]==CELL)]
+			DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI) 
+			plt.legend([CELL,KPI],loc='upper left')
+			plt.ylabel(KPI)
+	plt.show()
+	# Site=Sitechosen.get()
+	# if(Site!=""):
+	# 	DF=Df.loc[(Df["SITE"]==Site)]
+	# 	DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
+	# 	plt.show()
+	# else:
+	# 	DF=Df.loc[(Df["CELL"]==CELL)]
+	# 	DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI) 
+	# 	plt.legend([CELL,KPI],loc='upper left')
+	# 	plt.ylabel(KPI)
+	# 	plt.show()
 	chosenKpi.set("")
 	chosenCell.set("")
 	Graphchosen.set("")
@@ -102,10 +120,6 @@ window.config(background = "white")
 label_file_explorer = Label(window,text = "Upload your CSV ",width = 100, height = 4,fg = "blue")	
 button_explore = Button(window,text = "Browse Files",command = browseFiles)
 button_plot=Button(window,text="plot",command=plot)
-
-# button_explore = Button(window,text = "UMTS Browse Files",command = UMTSbrowseFiles)
-# button_plot=Button(window,text="plot",command=plot)
-
 label_file_explorer.grid(column = 1, row = 1)
 button_explore.grid(column = 1, row =2)
 ttk.Label(window, text = "KPI PERFORMANCE MONITORING TOOL",
@@ -118,6 +132,9 @@ ttk.Label(window, text = "Select The CELL for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 6, padx = 10, pady = 25)
 selectedCell = ttk.Combobox(window, width = 27, textvariable = chosenCell)
+selectedCell2 = Menubutton (window,text="CheckComboBox", relief=RAISED,direction=RIGHT)
+selectedCell2.menu= Menu(selectedCell2,tearoff=0)
+selectedCell2["menu"]= selectedCell2.menu
 selectedCell['values'] = ['Upload Your CSV First']
 selectedCell.grid(column = 1, row = 6)
 ttk.Label(window, text = "Select The Site for which you want to plot:",
@@ -130,6 +147,8 @@ selectedSite.grid(column = 1, row = 5)
 ttk.Label(window, text = "Select The Graph for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 8, padx = 10, pady = 25)
+
+
 Graphchosen=StringVar()
 selectedGraph = ttk.Combobox(window, width = 27, textvariable = Graphchosen)
 selectedGraph['values'] = ('bar','line','scatter')
@@ -137,8 +156,10 @@ selectedKPI = ttk.Combobox(window, width = 27, textvariable = chosenKpi)
 selectedKPI['values'] = ['Upload Your CSV First']
 selectedSite.grid(column   = 1, row = 5)
 selectedCell.grid(column  = 1, row=6)
+selectedCell2.grid(column =1,row =  10)
 selectedKPI.grid(column = 1, row=7)
 selectedGraph.grid(column  = 1, row=8)
+
 window.mainloop()
 
 
