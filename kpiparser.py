@@ -75,28 +75,46 @@ def browseFiles():
 		modified = '_'.join(NonKPIHeaders[i].split(" "))
 		NonKPIHeaders[i]= modified.upper()
 		Df.rename(columns = {original_name:NonKPIHeaders[i]}, inplace = True)
-	if "CELL" not in NonKPIHeaders:
-		selectedCell['values']= ["CELL is Not Present in CSV"]
-	else:
-		global ListOfCells
-		ListOfCells=list(set(Df['CELL'].tolist()))
-		cnt=0
-		for i in ListOfCells:
-			x=CellState[cnt]
-			selectedCell2.menu.add_checkbutton(label=i,variable = x)
-			cnt+=1
-		selectedCell['values']=ListOfCells
-	selectedSite['values']= list(set(Df['SITE'].tolist()))
+	global ListOfCells
+	ListOfCells=list(set(Df['CELL'].tolist()))
+	cnt=0
+	for i in ListOfCells:
+		x=CellState[cnt]
+		selectedCell2.menu.add_checkbutton(label=i,variable = x)
+		cnt+=1
 def plot():
 	KPI=chosenKpi.get()
 	GRAPH=Graphchosen.get()
+	ToBePlotted=[]
 	for i in range(len(ListOfCells)):
 		if( CellState[i].get()==1):
 			CELL= ListOfCells[i]
-			DF=Df.loc[(Df["CELL"]==CELL)]
-			DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI) 
-			plt.legend([CELL,KPI],loc='upper left')
-			plt.ylabel(KPI)
+			ToBePlotted.append(CELL) 
+	max_dates=0
+	base_index=0
+	for i in range(len(ToBePlotted)):
+		CELL  = ToBePlotted[i]
+		DF    = Df.loc[(Df["CELL"]==CELL)]
+		dates = len(DF.index)
+		if max_dates<dates:
+			max_dates= dates
+			base_index=i 
+	CELL= ToBePlotted[base_index]
+	DF=Df.loc[(Df["CELL"]==CELL)]
+	BasePlot= DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
+	print(DF) 
+	plt.ylabel(KPI)
+	Legends=[CELL]
+	for i in range(len(ToBePlotted)):
+		if(i==base_index):
+			continue
+		CELL = ToBePlotted[i]
+		DF   = Df.loc[(Df["CELL"]==CELL)]
+		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot) 
+		plt.legend([CELL],loc='upper left')
+		Legends.append(CELL)
+	plt.legend(Legends,loc='upper left')
+	plt.gcf().subplots_adjust(bottom=0.15)
 	plt.show()
 	# Site=Sitechosen.get()
 	# if(Site!=""):
@@ -131,12 +149,12 @@ ttk.Label(window, text = "Select The KPI for which you want to plot:",
 ttk.Label(window, text = "Select The CELL for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 6, padx = 10, pady = 25)
-selectedCell = ttk.Combobox(window, width = 27, textvariable = chosenCell)
-selectedCell2 = Menubutton (window,text="CheckComboBox", relief=RAISED,direction=RIGHT)
+
+selectedCell2 = Menubutton (window,text="DropDown Menu to Select CELL", relief=RAISED,direction=RIGHT,width=27)
 selectedCell2.menu= Menu(selectedCell2,tearoff=0)
 selectedCell2["menu"]= selectedCell2.menu
-selectedCell['values'] = ['Upload Your CSV First']
-selectedCell.grid(column = 1, row = 6)
+
+
 ttk.Label(window, text = "Select The Site for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 5, padx = 10, pady = 25)
@@ -155,11 +173,9 @@ selectedGraph['values'] = ('bar','line','scatter')
 selectedKPI = ttk.Combobox(window, width = 27, textvariable = chosenKpi)
 selectedKPI['values'] = ['Upload Your CSV First']
 selectedSite.grid(column   = 1, row = 5)
-selectedCell.grid(column  = 1, row=6)
-selectedCell2.grid(column =1,row =  10)
+selectedCell2.grid(column =1,row = 6)
 selectedKPI.grid(column = 1, row=7)
 selectedGraph.grid(column  = 1, row=8)
-
 window.mainloop()
 
 
