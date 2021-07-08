@@ -9,7 +9,9 @@ chosenKpi= StringVar()
 chosenCell=StringVar()
 Sitechosen=StringVar()
 CellState=[]
+SiteState=[]
 ListOfCells=[]
+ListOfSites=[]
 def browseFiles():
 	filename = filedialog.askopenfilename(initialdir = "/home/kartik/Downloads",title = "Select a File",filetypes = (("CSV Files","*.csv*"),("Excel Files","*.xls*")))
 	global Df
@@ -17,8 +19,12 @@ def browseFiles():
 	for i in range(50):
 		x=IntVar(0)
 		CellState.append(x)
+	for i in range(50):
+		x=IntVar(0)
+		SiteState.append(x)
 	Df=pd.read_csv(filename)
-	button_plot.grid(column=1,row=9)
+	button_plot1.grid(column=1,row=9)
+	button_plot2.grid(column=2,row=9)
 	fileState= Label(window,text="CSV Uploaded").grid(column=1,row=3)
 	KPIHeaders=[]  
 	NonKPIHeaders=[] 
@@ -76,13 +82,22 @@ def browseFiles():
 		NonKPIHeaders[i]= modified.upper()
 		Df.rename(columns = {original_name:NonKPIHeaders[i]}, inplace = True)
 	global ListOfCells
+	global ListOfSites
+	ListOfSites=list(set(Df['SITE'].tolist()))
+	cnt=0
+	for i in ListOfSites:
+		x= SiteState[cnt]
+		selectedSite2.menu.add_checkbutton(label=i,variable = x)
+		cnt+=1
+	if('CELL' not in NonKPIHeaders):
+		return 
 	ListOfCells=list(set(Df['CELL'].tolist()))
 	cnt=0
 	for i in ListOfCells:
 		x=CellState[cnt]
 		selectedCell2.menu.add_checkbutton(label=i,variable = x)
 		cnt+=1
-def plot():
+def plot1():
 	KPI=chosenKpi.get()
 	GRAPH=Graphchosen.get()
 	ToBePlotted=[]
@@ -102,7 +117,6 @@ def plot():
 	CELL= ToBePlotted[base_index]
 	DF=Df.loc[(Df["CELL"]==CELL)]
 	BasePlot= DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
-	print(DF) 
 	plt.ylabel(KPI)
 	Legends=[CELL]
 	for i in range(len(ToBePlotted)):
@@ -116,28 +130,54 @@ def plot():
 	plt.legend(Legends,loc='upper left')
 	plt.gcf().subplots_adjust(bottom=0.15)
 	plt.show()
-	# Site=Sitechosen.get()
-	# if(Site!=""):
-	# 	DF=Df.loc[(Df["SITE"]==Site)]
-	# 	DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
-	# 	plt.show()
-	# else:
-	# 	DF=Df.loc[(Df["CELL"]==CELL)]
-	# 	DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI) 
-	# 	plt.legend([CELL,KPI],loc='upper left')
-	# 	plt.ylabel(KPI)
-	# 	plt.show()
 	chosenKpi.set("")
 	chosenCell.set("")
 	Graphchosen.set("")
 	Sitechosen.set("")
-
+def plot2():
+	KPI=chosenKpi.get()
+	GRAPH=Graphchosen.get()
+	ToBePlotted=[]
+	for i in range(len(ListOfSites)):
+		if( SiteState[i].get()==1):
+			SITE= ListOfSites[i]
+			ToBePlotted.append(SITE) 
+	max_dates=0
+	base_index=0
+	for i in range(len(ToBePlotted)):
+		SITE  = ToBePlotted[i]
+		DF    = Df.loc[(Df["SITE"]==SITE)]
+		dates = len(DF.index)
+		if max_dates<dates:
+			max_dates= dates
+			base_index=i 
+	SITE= ToBePlotted[base_index]
+	DF=Df.loc[(Df["SITE"]==SITE)]
+	BasePlot= DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
+	plt.ylabel(KPI)
+	Legends=[SITE]
+	for i in range(len(ToBePlotted)):
+		if(i==base_index):
+			continue
+		SITE = ToBePlotted[i]
+		DF   = Df.loc[(Df["SITE"]==SITE)]
+		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot) 
+		plt.legend([SITE],loc='upper left')
+		Legends.append(SITE)
+	plt.legend(Legends,loc='upper left')
+	plt.gcf().subplots_adjust(bottom=0.15)
+	plt.show()
+	chosenKpi.set("")
+	chosenCell.set("")
+	Graphchosen.set("")
+	Sitechosen.set("")
 window.title('File Explorer')
 window.geometry("500x500")
 window.config(background = "white")
 label_file_explorer = Label(window,text = "Upload your CSV ",width = 100, height = 4,fg = "blue")	
 button_explore = Button(window,text = "Browse Files",command = browseFiles)
-button_plot=Button(window,text="plot",command=plot)
+button_plot1=Button(window,text="plot on Selected Cells",command=plot1)
+button_plot2=Button(window,text="plot on Selected Sites",command=plot2)
 label_file_explorer.grid(column = 1, row = 1)
 button_explore.grid(column = 1, row =2)
 ttk.Label(window, text = "KPI PERFORMANCE MONITORING TOOL",
@@ -158,9 +198,9 @@ selectedCell2["menu"]= selectedCell2.menu
 ttk.Label(window, text = "Select The Site for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
 		row = 5, padx = 10, pady = 25)
-selectedSite = ttk.Combobox(window, width = 27, textvariable = Sitechosen)
-selectedSite['values'] = ['Upload Your CSV First']
-selectedSite.grid(column = 1, row = 5)
+selectedSite2 = Menubutton (window,text="DropDown Menu to Select SITE", relief=RAISED,direction=RIGHT,width=27)
+selectedSite2.menu= Menu(selectedSite2,tearoff=0)
+selectedSite2["menu"]= selectedSite2.menu
 
 ttk.Label(window, text = "Select The Graph for which you want to plot:",
 		font = ("Times New Roman", 10)).grid(column = 0,
@@ -172,7 +212,7 @@ selectedGraph = ttk.Combobox(window, width = 27, textvariable = Graphchosen)
 selectedGraph['values'] = ('bar','line','scatter')
 selectedKPI = ttk.Combobox(window, width = 27, textvariable = chosenKpi)
 selectedKPI['values'] = ['Upload Your CSV First']
-selectedSite.grid(column   = 1, row = 5)
+selectedSite2.grid(column =1 ,row = 5)
 selectedCell2.grid(column =1,row = 6)
 selectedKPI.grid(column = 1, row=7)
 selectedGraph.grid(column  = 1, row=8)
