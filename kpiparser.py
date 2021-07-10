@@ -12,6 +12,7 @@ CellState=[]
 SiteState=[]
 ListOfCells=[]
 ListOfSites=[]
+colors=["blue","red",'green',"pink","orange","brown","maroon","darkvoilet","lime"]
 def browseFiles():
 	filename = filedialog.askopenfilename(initialdir = "/home/kartik/Downloads",title = "Select a File",filetypes = (("CSV Files","*.csv*"),("Excel Files","*.xls*")))
 	global Df
@@ -24,7 +25,7 @@ def browseFiles():
 		SiteState.append(x)
 	Df=pd.read_csv(filename)
 	button_plot1.grid(column=1,row=9)
-	button_plot2.grid(column=2,row=9)
+	button_plot2.grid(column=1,row=10)
 	fileState= Label(window,text="CSV Uploaded").grid(column=1,row=3)
 	KPIHeaders=[]  
 	NonKPIHeaders=[] 
@@ -117,15 +118,24 @@ def plot1():
 	CELL= ToBePlotted[base_index]
 	DF=Df.loc[(Df["CELL"]==CELL)]
 	BasePlot= DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
+	Dates=DF['PERIOD_START_TIME'].tolist()
 	plt.ylabel(KPI)
+	indexes=[i for i in range(len(DF.index))]
+	DF['TempCol']=indexes
+	DF.set_index('TempCol',inplace=True)
+	plt.xticks(DF.index, DF['PERIOD_START_TIME'],rotation=90)
 	Legends=[CELL]
 	for i in range(len(ToBePlotted)):
 		if(i==base_index):
 			continue
 		CELL = ToBePlotted[i]
 		DF   = Df.loc[(Df["CELL"]==CELL)]
-		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot) 
+		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot,color=colors[i]) 
 		plt.legend([CELL],loc='upper left')
+		indexes=[i for i in range(len(DF.index))]
+		DF['TempCol']=indexes
+		DF.set_index('TempCol',inplace=True)
+		plt.xticks(DF.index, DF['PERIOD_START_TIME'],rotation=90)
 		Legends.append(CELL)
 	plt.legend(Legends,loc='upper left')
 	plt.gcf().subplots_adjust(bottom=0.15)
@@ -155,14 +165,22 @@ def plot2():
 	DF=Df.loc[(Df["SITE"]==SITE)]
 	BasePlot= DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI)
 	plt.ylabel(KPI)
+	indexes=[i for i in range(len(DF.index))]
+	DF['TempCol']=indexes
+	DF.set_index('TempCol',inplace=True)
+	plt.xticks(DF.index, DF['PERIOD_START_TIME'],rotation=90)
 	Legends=[SITE]
 	for i in range(len(ToBePlotted)):
 		if(i==base_index):
 			continue
 		SITE = ToBePlotted[i]
 		DF   = Df.loc[(Df["SITE"]==SITE)]
-		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot) 
+		DF.plot(kind=GRAPH,x="PERIOD_START_TIME",y=KPI,ax=BasePlot,color=colors[i]) 
 		plt.legend([SITE],loc='upper left')
+		indexes=[i for i in range(len(DF.index))]
+		DF['TempCol']=indexes
+		DF.set_index('TempCol',inplace=True)
+		plt.xticks(DF.index, DF['PERIOD_START_TIME'],rotation=90)
 		Legends.append(SITE)
 	plt.legend(Legends,loc='upper left')
 	plt.gcf().subplots_adjust(bottom=0.15)
